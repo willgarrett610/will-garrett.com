@@ -80,48 +80,41 @@
         <h1 class="sect_title" id="projects">Projects</h1>
 
         <div class="grid">
-            <div class="card_container">
-                <div class="card">
-                    <div class="card_image">
-                        <img src="./img/cubesolver.png">
-                    </div>
-                    <div class="card_title">
-                        Cube Solver &#8226; Java &#8226; 2014
-                    </div>
-                </div>
-            </div>
-            <div class="card_container">
-                <div class="card">
-                    <div class="card_image">
-                        <img src="./img/sudokusolver.png">
-                    </div>
-                    <div class="card_title">
-                        Java
-                    </div>
-                </div>
-            </div>
-            <div class="card_container">
-                <div class="card">
-                    <div class="card_image">
-                        <img src="https://sdtimes.com/wp-content/uploads/2019/03/jW4dnFtA_400x400.jpg">
-                    </div>
-                    <div class="card_title">
-                        Java
-                    </div>
-                </div>
-            </div>
-            <div class="card_container">
-                <div class="card">
-                    <div class="card_image">
-                        <img src="https://sdtimes.com/wp-content/uploads/2019/03/jW4dnFtA_400x400.jpg">
-                    </div>
-                    <div class="card_title">
-                        Java
-                    </div>
-                </div>
-            </div>
             <?php
-                
+                require_once('sql.php');
+                $server = "localhost";
+                $user = $GLOBALS['sql_user'];
+                $pass = $GLOBALS['sql_pass'];
+                $db = "zerentha_willgarrett";
+
+                $conn = new mysqli($server, $user, $pass, $db);
+
+                if ($conn->connect_error) {
+                    die("Connection failed: " . $conn->connect_error);
+                }
+
+                $stmt = $conn->prepare("SELECT * FROM projects");
+                $stmt->execute();
+                $results = $stmt->get_result();
+
+                if ($results->num_rows > 0) {
+                    while($row = $results->fetch_assoc()) {
+                        ?>
+                        <div class="card_container">
+                            <a href="<?=$row['Link']?>">
+                                <div class="card">
+                                    <div class="card_image">
+                                        <img src="<?=$row['Image']?>">
+                                    </div>
+                                    <div class="card_title">
+                                        <?=$row['Name']?> &#8226; <?=$row['Language']?> &#8226; <?=$row['Year']?>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <?php
+                    }
+                }
             ?>
         </div>
     </div>
