@@ -1,0 +1,140 @@
+<!DOCTYPE HTML>
+
+<html>
+
+<head>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.1/p5.min.js"></script>
+<script src="/js/p5.dom.js"></script>
+<title>Mandelbrot</title>
+
+<style>
+
+body {
+  margin: 0;
+  display: inline;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+}
+
+body, html {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<script>
+
+var threshold = 2;
+var maxIterations = 500;
+
+var graphWidth = 3.0;
+var graphHeight = 2.0;
+
+var midX = -0.5;
+var midY = 0;
+var zoom = 1.0;
+
+var firstDraw = true;
+
+function setup() {
+  createCanvas(windowWidth,windowHeight);
+  canvas.oncontextmenu = function() {return false;};
+  pixelDensity(1);
+  colorMode(HSB, 100);
+  canvas.style = null;
+}
+
+function resetValues() {
+  zoom = 1;
+  midX = -0.5;
+  midY = 0;
+}
+
+function pixelToPoint(x,y) {
+  return {x: map(x, 0, width, midX - (graphWidth / 2) / zoom, midX + (graphWidth / 2) / zoom),
+  y: map(y, 0, height, midY - (graphHeight / 2) / zoom, midY + (graphHeight / 2) / zoom)};
+}
+
+function render() {
+  loadPixels();
+  var i = 0;
+  for(var y = 0; y < height; y++) {
+    for(var x = 0; x < width; x++) {
+      var point = pixelToPoint(x,y);
+      var a = point["x"];
+      var b = point["y"];
+      var result = calculate(a,b);
+      if(result == -1) {
+        pixels[i++] = 0;
+        pixels[i++] = 0;
+        pixels[i++] = 0;
+        pixels[i++] = 255;
+      } else {
+        var hue = map(result,0,maxIterations,0,100);
+        var c = color(hue,100,100);
+        pixels[i++] = red(c);
+        pixels[i++] = green(c);
+        pixels[i++] = blue(c);
+        pixels[i++] = 255;
+      }
+    }
+  }
+  updatePixels();
+}
+
+function draw() {
+  if(firstDraw) {
+    render();
+    firstDraw = false;
+  }
+}
+
+function mousePressed() {
+  if(mouseX < width && mouseX > 0 && mouseY < height && mouseY > 0) {
+    if(mouseButton === "left") {
+      var point = pixelToPoint(mouseX, mouseY);
+      midX = point["x"];
+      midY = point["y"];
+      zoom *= 1.5;
+    } else {
+      zoom /= 1.5;
+    }
+    render();
+  }
+}
+
+var logBase = 1.0 / Math.log(2.0);
+var logHalfBase = Math.log(0.5)*logBase;
+
+function calculate(x,y) {
+  var cX = x;
+  var cY = y;
+  var i = 0;
+  while(i < maxIterations) {
+    var a = x * x - y * y;
+    var b = x * y * 2;
+    x = a + cX;
+    y = b + cY;
+    if(x*x + y*y > 4) {
+      var div = 5 + i - logHalfBase - log(log(x*x+y*y))*logBase;
+      return div;
+    }
+    i++;
+  }
+  return -1;
+}
+
+</script>
+
+</body>
+
+</html>
